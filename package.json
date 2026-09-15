@@ -1,0 +1,13 @@
+{
+  "name": "aps-token-proxy",
+  "version": "1.0.0",
+  "description": "Proxy per generare token APS per Power BI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.19.2"
+  }
+}
