@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <title>Test Viewer APS - 15151980</title>
+  <link rel="stylesheet" href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css" type="text/css">
+  <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: sans-serif; }
+    #forgeViewer { width: 100%; height: 100vh; position: relative; background: #eee; }
+    #status {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: 10px 16px; background: #222; color: #fff;
+      font-size: 14px; z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div id="status">In attesa di avvio...</div>
+  <div id="forgeViewer"></div>
+
+  <script>
+    // Questi due valori sono già impostati correttamente per il tuo test:
+    var urn = "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6ZHVmZXJjby1yZW5kZXItYXBzLXRlc3QwMS8xNTE1MTk4MC5zdHA";
+    var tokenEndpoint = "https://aps-token-proxy.onrender.com/token";
+
+    function setStatus(msg) {
+      document.getElementById('status').innerText = msg;
+      console.log(msg);
+    }
+
+    function getAccessToken(onTokenReady) {
+      setStatus("Richiesta token in corso...");
+      fetch(tokenEndpoint)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          setStatus("Token ricevuto, avvio inizializzazione viewer...");
+          onTokenReady(data.access_token, data.expires_in);
+        })
+        .catch(function (err) {
+          setStatus("ERRORE nel recupero token: " + err);
+        });
+    }
+
+    var options = {
+      env: 'AutodeskProduction2',
+      api: 'streamingV2',
+      getAccessToken: getAccessToken
+    };
+
+    Autodesk.Viewing.Initializer(options, function () {
+      setStatus("Viewer inizializzato, avvio caricamento documento...");
+      var viewerDiv = document.getElementById('forgeViewer');
+      var viewer = new Autodesk.Viewing.GuiViewer3D(viewerDiv);
+      viewer.start();
+
+      var startTime = Date.now();
+
+      var documentId = 'urn:' + urn;
+      Autodesk.Viewing.Document.load(documentId, function (doc) {
+        setStatus("Documento trovato, avvio caricamento geometria...");
+        var defaultModel = doc.getRoot().getDefaultGeometry();
+        viewer.loadDocumentNode(doc, defaultModel).then(function () {
+          var seconds = ((Date.now() - startTime) / 1000).toFixed(1);
+          setStatus("Modello caricato con successo in " + seconds + " secondi.");
+        });
+      }, function (errorCode, errorMsg) {
+        setStatus("ERRORE caricamento documento: " + errorCode + " - " + errorMsg);
+      });
+    });
+  </script>
+</body>
+</html>
