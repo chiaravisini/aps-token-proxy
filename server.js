@@ -13,7 +13,7 @@ app.get('/token', async (req, res) => {
         
         const response = await axios.post(
             'https://developer.api.autodesk.com/authentication/v2/token',
-            'grant_type=client_credentials&scope=viewables:read',
+            'grant_type=client_credentials&scope=data:read data:write data:create bucket:create bucket:read viewables:read',
             {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
